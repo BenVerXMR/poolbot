@@ -212,7 +212,7 @@ class bot(ch.RoomManager):
       #cmds = ['/help', '/effort', '/pooleffort', '/price', '/block',
       #        '/window', '/test'] # Update if new command
       #hlps = ['?pplns', '?register', '?RTFN', '?rtfn', '?help', '?bench', '?list'] # Update if new helper
-      cmds = ['/help', '/trite', '/scroll', '/goblin', '/mizzery', '/burger', '/motto']
+      cmds = ['/help', '/trite', '/scroll', '/goblin', '/mizzery', '/burger', '/motto', '/daily', '/statsdiffer', '/fuckduck', '/bentley']
       hlps = ['?trite', '?help', '?list', '?daily']
       searchObj = re.findall(r'(\/\w+)(\.\d+)?|(\?\w+)', message.body, re.I)
       searchObjCmd = []
@@ -252,27 +252,60 @@ class bot(ch.RoomManager):
       try:
         
         if cmd.lower() == "help":
-            room.message("Available commands (use: /command): trite, help, scroll, goblin, burger, mizzery, motto") # Update if new command
+            room.message("Available commands (use: /command): trite, help, scroll, goblin, burger, mizzery, motto, daily, statsdiffer, fuckduck, bentley") # Update if new command
 
         if cmd.lower() == "burger":
             (blockCounter, timeDifferenceArrayResult, nextBlock, messageEst, messageEstSmiley, effort24Val, poolStatsAvgHashRate) = bot.burger()
-            room.message("*burger*" + " Total within 24 hours: " + str(blockCounter) + " |. " + "Average effort: " + str(effort24Val) + "%" + " |" + ". Average time between: " + str(prettyTimeDelta(timeDifferenceArrayResult)) + " |." + messageEst + str(prettyTimeDelta(nextBlock)) + messageEstSmiley + " |. " + " With average pool hashrate: " + str(poolStatsAvgHashRate) + "MH/s")
+            room.message("\n\n\n*burger*" + " Total within 24 hours: " + str(blockCounter) + " |. " + "\nAverage effort: " + str(effort24Val) + "%" + " |" + ". \nAverage time between: " + str(prettyTimeDelta(timeDifferenceArrayResult)) + " |.\n" + messageEst + str(prettyTimeDelta(nextBlock)) + messageEstSmiley + " |. " + " \nWith average pool hashrate: " + str(poolStatsAvgHashRate) + "MH/s")
 
         if cmd.lower() == "scroll":
             room.message("Scroll up a few lines will ya, Djeez")
 
         if cmd.lower() == "goblin":
-            room.message("please stop writing faster than people can read. Have a bowl.")
+            room.message("please stop writing faster than people can read. \nHave a bowl.")
 
         if cmd.lower() == "motto":
-            room.message("I used to be processing drugs. Now I'm drugging processors.")
-			
+            room.message("\nI used to be processing drugs. \nNow I'm drugging processors.")
+
+        if cmd.lower() == "fuckduck":
+            room.message("\nI'm afraid @" + user.name + " wants you to go fuck a duck...")
+
         if cmd.lower() == "mizzery":
             room.message("that puzzles me")
             time.sleep(6)
-
+			
+        if cmd.lower() == "bentley":
+            kraken = requests.get("https://api.kraken.com/0/public/Ticker?pair=XMREUR").json()
+            EUR_XMR_krak = kraken['result']['XXMRZEUR']['c'][0]
+            poolstatss = requests.get(apiUrl + "pool/stats/").json()
+            totalblockss = poolstatss['pool_statistics']['totalBlocksFound']
+            #savings = (6/10*int(totalblocks)*int(EUR_XMR_krak))
+            savings = int(totalblockss)
+            blocknum = str(savings)
+            monerorate = str(EUR_XMR_krak)
+            saveuro = float(EUR_XMR_krak)
+            savings = savings * saveuro * 6 / 10 / 100 * 6
+            blades = 95 * saveuro
+            bladesformat = format(blades, '.2f')
+            savingsafterblades = savings - blades
+            #krak = ast.literal_eval(EUR_XMR_krak)
+            savv = format(savings, '.2f')
+            savvafter = format(savingsafterblades, '.2f')
+            #savv = str(savings)
+            moretosave = 200000 - savings
+            moretosaveafterblades = moretosave = 200000 - savingsafterblades
+            more = format(moretosave, '.2f')
+            moreafterblades = format(moretosaveafterblades, '.2f')
+            room.message("A Bentley with some options easily costs about 200.000 euro.\n Our pool found " + blocknum + " blocks since its conception. \nCurrent reward is slightly above 6 XMR, \ncurrent value of XMR on Kraken is :" + monerorate + "euro. \nAt 0.6 % pool fee, total income of M5M400 would be (slightly, depending on past rewards) more than " + savv + "\nThat means he still had to save " + more + " euro. \n\n He bought some blade servers though, so he's down 95 XMR again, or " + bladesformat + "euro. \n\nThat leaves him with " + savvafter + "euro or now he has to save " + moreafterblades + "euro again.")
+			
+        if cmd.lower() == "daily":
+            room.message("https://goo.gl/c1TQgc")
+			
+        if cmd.lower() == "statsdiffer":
+            room.message("Your computer does the following while mining:\n\nThe pool gives you a search-job, then your miner starts calculating hashes until it finds one that matches the requirements (difficulty). The miner sends the pool the result if it exceeds the difficulty.\n\nThe pool does not see how often you perform the hash calculations. It only knows when your miner submits a hash that exceeds the difficulty.\n\nThe pool then uses the law of probability to estimate the number of hashes it took to make the share result you found. This is ONLY AN ESTIMATE. That is why you see the fluctuating numbers.\n\nYou do not get paid based on your hashrate, but by a combination of the difficulty of AND the number of shares submitted to the pool.\n\nIn very basic terms:Shares*Difficulty=MuhMoneez\n\n(credits to TheJerichoJones)")
+			
         if cmd.lower() == "trite":
-            justsain = ("Attention. Emergency. All personnel must evacuate immediately. You now have 15 minutes to reach minimum safe distance.",
+            justsain = ("Attention. Emergency. All personnel must evacuate immediately. \nYou now have 15 minutes to reach minimum safe distance.",
                         "I'm sorry @" + user.name + ", I'm afraid I can't do that.",
                         "@" + user.name + ", you are fined one credit for violation of the verbal morality statute.",
                         "42", "My logic is undeniable.", "Danger, @" + user.name + ", danger!",
@@ -286,11 +319,7 @@ class bot(ch.RoomManager):
       except:
         print("Error while attempting /" + str(cmd.lower()))
         room.message("Main Cmd/Msg Function Except.")
-        room.message("*burger*" + " Total within 24 hours: " + str(blockCounter) + " |. " + "Average effort: " + str(
-            effort24Val) + "%" + " |" + ". Average time between: " + str(
-            prettyTimeDelta(timeDifferenceArrayResult)) + " |." + messageEst + str(
-            prettyTimeDelta(nextBlock)) + messageEstSmiley + " |. " + " With pool hashrate: " + str(
-            poolStatsAvgHashRate))
+        
 
 
 rooms = [""] # List of rooms you want the bot to connect to

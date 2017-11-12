@@ -7,6 +7,7 @@ import random
 import time
 import re
 
+
 apiUrl = "https://supportxmr.com/api/"
 
 def prettyTimeDelta(seconds):
@@ -42,6 +43,7 @@ class bot(ch.RoomManager):
   try:
     poolstats = requests.get(apiUrl + "pool/stats/").json()
     totalblocks = poolstats['pool_statistics']['totalBlocksFound']
+    totalblocks = int(totalblocks)
     NblocksNum = totalblocks // 100 * 100 # Integer floor division
     Nblocklist = requests.get(apiUrl + "pool/blocks/pplns?limit=" + str(totalblocks)).json()
     Ntotalshares = 0
@@ -49,7 +51,7 @@ class bot(ch.RoomManager):
     Nlucks = []
     for i in reversed(range(totalblocks)):
       if i == (totalblocks - NblocksNum - 1):
-    	  break # Ignore the last (totalblocks % NblocksNum) blocks (note the off-by-one offset)
+          break # Ignore the last (totalblocks % NblocksNum) blocks (note the off-by-one offset)
       Ntotalshares += Nblocklist[i]['shares']
       if Nblocklist[i]['valid'] == 1:
         Ndiff = Nblocklist[i]['diff']
@@ -96,12 +98,15 @@ class bot(ch.RoomManager):
 
   def checkForNewBlock(self, room):
     prevBlockNum = self._lastFoundBlockNum
+    prevBlockNum = int(prevBlockNum)
     prevBlockTime = self._lastFoundBlockTime
+    prevBlockTime = int(prevBlockTime)
     if prevBlockNum == 0: # Check for case we can't read the number
       return
     self.getLastFoundBlockNum()
+    self._lastFoundBlockNum = int(self._lastFoundBlockNum)
     if self._lastFoundBlockNum > prevBlockNum:
-      BlockTimeAgo = prettyTimeDelta(int(self._lastFoundBlockTime - prevBlockTime))
+      BlockTimeAgo = prettyTimeDelta(int(int(self._lastFoundBlockTime) - prevBlockTime))
       room.message("*burger* #" + str(self._lastFoundBlockNum) + " | &#x26cf; " + str(self._lastFoundBlockLuck) + "% | &#x23F0; " + str(BlockTimeAgo)+ " | &#x1DAC; " + self._lastFoundBlockValue)
 
    # def onJoin(self, room, user):
@@ -119,7 +124,7 @@ class bot(ch.RoomManager):
     try: 
       cmds = ['/help', '/effort', '/pooleffort', '/price', '/block',
               '/window', '/test'] # Update if new command
-      hlps = ['?pplns', '?register', '?RTFN', '?rtfn', '?help', '?bench', '?list'] # Update if new helper
+      hlps = ['?pplns', '?register', '?RTFN', '?rtfn', '?help', '?bench', '?list', '?daily'] # Update if new helper
       searchObj = re.findall(r'(\/\w+)(\.\d+)?|(\?\w+)', message.body, re.I)
       if '/all' in searchObj:
         room.message(" &#x266b;&#x266c;&#x266a; All you need is love! *h* Love is all you need! :D")
@@ -147,7 +152,7 @@ class bot(ch.RoomManager):
         hlp = hlp[1:]
 
         if hlp.lower() == "list":
-            room.message("?pplns - links to explanation, ?register - how to register, ?RTFN - notice about expected downtime, ?bench - our benchmarks")
+            room.message("?pplns - links to explanation, ?register - how to register, ?RTFN - notice about expected downtime, ?bench - our benchmarks, ?daily - historical overview of daily burgers")
 
         if hlp.lower() == "help":
             room.message("The answer to your question was probably given already. If not, it's 42. Now, you can ask the question.")
@@ -166,7 +171,12 @@ class bot(ch.RoomManager):
             room.message("Seas 'n skies be clear, cap'n!")
 
         if hlp.lower() == "bench":
-            room.message("https://docs.google.com/spreadsheets/d/18IrFEhWP89oG_BTUsQGS5IDG8LUYjCHDiRQkOuQ4a9A/edit#gid=0")
+           room.message("https://docs.google.com/spreadsheets/d/18IrFEhWP89oG_BTUsQGS5IDG8LUYjCHDiRQkOuQ4a9A/edit#gid=0")
+
+        if hlp.lower() == "daily":
+            room.message("https://goo.gl/c1TQgc")
+			
+
 
     for i in range(len(command)):
       cmd = command[i]
@@ -180,14 +190,16 @@ class bot(ch.RoomManager):
             room.message("Available commands (use: /command): test, help, effort, pooleffort, price, block, window")
           
         if cmd.lower() == "effort":
-            poolStats = requests.get(apiUrl + "pool/stats/").json()
+            poolstats = requests.get(apiUrl + "pool/stats/").json()
             networkStats = requests.get(apiUrl + "network/stats/").json()
             lastblock = requests.get(apiUrl + "pool/blocks/pplns?limit=1").json()
-            rShares = poolStats['pool_statistics']['roundHashes']
+            rShares = poolstats['pool_statistics']['roundHashes']
+            rShares = int(rShares)
             if lastblock[0]['valid'] == 0:
               previousshares = lastblock[0]['shares'] # If the last block was invalid, add those shares to the current effort
               rShares = rShares + previousshares
             diff = networkStats['difficulty']
+            diff = int(diff)
             luck = int(round(100*rShares/diff))
             if rShares == 0:
               room.message("Until further notice I make 0% effort. I'm tired. Ask someone else.")
@@ -350,15 +362,15 @@ class bot(ch.RoomManager):
             room.message(random.choice(justsain))
       
       except json.decoder.JSONDecodeError:
-      	print("There was a json.decoder.JSONDecodeError while attempting /" + str(cmd.lower()) + " (probably due to /pool/stats/)")
-      	room.message("JSON Bourne is trying to kill me!")
+        print("There was a json.decoder.JSONDecodeError while attempting /" + str(cmd.lower()) + " (probably due to /pool/stats/)")
+        room.message("JSON Bourne is trying to kill me!")
       except:
-      	print("Error while attempting /" + str(cmd.lower()))
-      	room.message("Oops. Something went wrong. You cannot afford your own Bot. Try again in a few minutes.")
+        print("Error while attempting /" + str(cmd.lower()))
+        room.message("Oops. Something went wrong. You cannot afford your own Bot. Try again in a few minutes.")
 
 rooms = [""] # List of rooms you want the bot to connect to
 username = "" # For tests you can use your own - trigger bot as anon
-password = ""
+password = "*"
 checkForNewBlockInterval = 10 # How often to check for new block, in seconds. If not set, default value of 20 will be used
 
 try:
