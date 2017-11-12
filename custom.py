@@ -293,7 +293,7 @@ class bot(ch.RoomManager):
             savvafter = format(savingsafterblades, '.2f')
             #savv = str(savings)
             moretosave = 200000 - savings
-            moretosaveafterblades = moretosave = 200000 - savingsafterblades
+            moretosaveafterblades = 200000 - savingsafterblades
             more = format(moretosave, '.2f')
             moreafterblades = format(moretosaveafterblades, '.2f')
             room.message("A Bentley with some options easily costs about 200.000 euro.\n Our pool found " + blocknum + " blocks since its conception. \nCurrent reward is slightly above 6 XMR, \ncurrent value of XMR on Kraken is :" + monerorate + "euro. \nAt 0.6 % pool fee, total income of M5M400 would be (slightly, depending on past rewards) more than " + savv + "\nThat means he still had to save " + more + " euro. \n\n He bought some blade servers though, so he's down 95 XMR again, or " + bladesformat + "euro. \n\nThat leaves him with " + savvafter + "euro or now he has to save " + moreafterblades + "euro again.")
