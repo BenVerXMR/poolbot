@@ -212,8 +212,8 @@ class bot(ch.RoomManager):
       #cmds = ['/help', '/effort', '/pooleffort', '/price', '/block',
       #        '/window', '/test'] # Update if new command
       #hlps = ['?pplns', '?register', '?RTFN', '?rtfn', '?help', '?bench', '?list'] # Update if new helper
-      cmds = ['/help', '/trite', '/scroll', '/goblin', '/mizzery', '/burger', '/motto', '/daily', '/statsdiffer', '/fuckduck', '/bentley', '/nismo']
-      hlps = ['?trite', '?help', '?list', '?daily']
+      cmds = ['/help', '/trite', '/scroll', '/goblin', '/mizzery', '/burger', '/motto', '/fuckduck', '/bentley', '/nismo']
+      hlps = ['?trite', '?help', '?vega', '?daily', '?statsdiffer']
       searchObj = re.findall(r'(\/\w+)(\.\d+)?|(\?\w+)', message.body, re.I)
       searchObjCmd = []
       searchObjArg = []
@@ -240,7 +240,16 @@ class bot(ch.RoomManager):
             room.message("Custom bot/slave. Thanks! https://github.com/miziel/poolbot")
 
         if hlp.lower() == "help":
-            room.message("Available commands (use: ?command): help, trite, list, daily") # Update if new helper
+            room.message("Available commands (use: ?command): help, trite, vega, statsdiffer, daily") # Update if new helper
+
+        if hlp.lower() == "daily":
+            room.message("https://goo.gl/c1TQgc")
+			
+        if hlp.lower() == "statsdiffer":
+            room.message("Your computer does the following while mining:\n\nThe pool gives you a search-job, then your miner starts calculating hashes until it finds one that matches the requirements (difficulty). The miner sends the pool the result if it exceeds the difficulty.\n\nThe pool does not see how often you perform the hash calculations. It only knows when your miner submits a hash that exceeds the difficulty.\n\nThe pool then uses the law of probability to estimate the number of hashes it took to make the share result you found. This is ONLY AN ESTIMATE. That is why you see the fluctuating numbers.\n\nYou do not get paid based on your hashrate, but by a combination of the difficulty of AND the number of shares submitted to the pool.\n\nIn very basic terms:Shares*Difficulty=MuhMoneez\n\n(credits to TheJerichoJones)")
+			
+        if hlp.lower() == "vega":
+            room.message("https://vegamining.blogspot.com/")
             
 
     for i in range(len(command)):
@@ -252,7 +261,7 @@ class bot(ch.RoomManager):
       try:
         
         if cmd.lower() == "help":
-            room.message("Available commands (use: /command): trite, help, scroll, goblin, burger, mizzery, motto, daily, statsdiffer, fuckduck, bentley, nismo") # Update if new command
+            room.message("Available commands (use: /command): trite, help, scroll, goblin, burger, mizzery, motto, fuckduck, bentley, nismo. Help is in helpcommands, try ?help") # Update if new command
 
         if cmd.lower() == "burger":
             (blockCounter, timeDifferenceArrayResult, nextBlock, messageEst, messageEstSmiley, effort24Val, poolStatsAvgHashRate) = bot.burger()
@@ -299,8 +308,8 @@ class bot(ch.RoomManager):
             room.message("A Bentley with some options easily costs about 200.000 euro.\n Our pool found " + blocknum + " blocks since its conception. \nCurrent reward is slightly above 6 XMR, \ncurrent value of XMR on Kraken is " + monerorate + " euro. \nAt 0.6 % pool fee, total income of M5M400 would be (slightly, depending on past rewards) more than " + savv + " euro.\nThat means he still had to save " + more + " euro. \n\n He bought some blade servers though, so he's down 95 XMR again, or " + bladesformat + "euro. \n\nThat leaves him with " + savvafter + "euro or now he has to save " + moreafterblades + "euro again.")
 			
         if cmd.lower() == "nismo":
-            kraken = requests.get("https://api.kraken.com/0/public/Ticker?pair=XMREUR").json()
-            EUR_XMR_krak = kraken['result']['XXMRZEUR']['c'][0]
+            kraken = requests.get("https://api.kraken.com/0/public/Ticker?pair=XMRUSD").json()
+            EUR_XMR_krak = kraken['result']['XXMRZUSD']['c'][0]
             poolstatss = requests.get(apiUrl + "pool/stats/").json()
             totalblockss = poolstatss['pool_statistics']['totalBlocksFound']
             #savings = (6/10*int(totalblocks)*int(EUR_XMR_krak))
@@ -314,13 +323,7 @@ class bot(ch.RoomManager):
             #savv = str(savings)
             moretosave = 184950 - savings
             more = format(moretosave, ',.2f')
-            room.message("A Nismo starts From 184,950.00 euro.\n Our pool found " + blocknum + " blocks since its conception. \nCurrent reward is slightly above 6 XMR, \ncurrent value of XMR on Kraken is " + monerorate + " euro. \nAt 0.6 % pool fee, total pool income would be (slightly, depending on past rewards) more than " + savv + " euro.\n If M5M400 paid Snipa22 what he would like to get paid, Snipa still had to save " + more + " euro. \n\n As we know nothing about the income flows from M5M400 to Snipa, \n\n(and M5M400 states the same thing)... \n\n We're afraid Snipa will have to come up with 184,950.00 euro to get his car...")
-			
-        if cmd.lower() == "daily":
-            room.message("https://goo.gl/c1TQgc")
-			
-        if cmd.lower() == "statsdiffer":
-            room.message("Your computer does the following while mining:\n\nThe pool gives you a search-job, then your miner starts calculating hashes until it finds one that matches the requirements (difficulty). The miner sends the pool the result if it exceeds the difficulty.\n\nThe pool does not see how often you perform the hash calculations. It only knows when your miner submits a hash that exceeds the difficulty.\n\nThe pool then uses the law of probability to estimate the number of hashes it took to make the share result you found. This is ONLY AN ESTIMATE. That is why you see the fluctuating numbers.\n\nYou do not get paid based on your hashrate, but by a combination of the difficulty of AND the number of shares submitted to the pool.\n\nIn very basic terms:Shares*Difficulty=MuhMoneez\n\n(credits to TheJerichoJones)")
+            room.message("A Nismo starts From 176,585.00 usd.\n Our pool found " + blocknum + " blocks since its conception. \nCurrent reward is slightly above 6 XMR, \ncurrent value of XMR on Kraken is " + monerorate + " usd. \nAt 0.6 % pool fee, total pool income would be (slightly, depending on past rewards) more than " + savv + " usd.\n If M5M400 paid Snipa22 what he would like to get paid, Snipa still had to save " + more + " usd. \n\n As we know nothing about the income flows from M5M400 to Snipa, \n\n(and M5M400 states the same thing)... \n\n We're afraid Snipa will have to come up with 176,585.00 usd to get his car...")
 			
         if cmd.lower() == "trite":
             justsain = ("Attention. Emergency. All personnel must evacuate immediately. \nYou now have 15 minutes to reach minimum safe distance.",
