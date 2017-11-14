@@ -4,16 +4,19 @@ supportXMR chatango PoolBot project
 ### List of available commands:
 ```
 /help            - Displays available commands
-/effort          - Displays our effort for the current block
-/pooleffort      - Displays the pool's overall effort
-/pooleffort.n    - Displays the pool's effort for last n blocks
-/price           - Displays XMR price in BTC and USD
-/block           - Displays info about the last block found
-/window          - Displays estimated pplns window in days/hours/minutes
-/test            - Displays random test messages
+/trite           - Displays fun
+/scroll		     - Displays scrollup fun
+/goblin	         - Displays rapid typing fun
+/burger          - Displays burgers in the past 24hrs
+/mizzery         - Displays mistery
+/motto           - Displays motto (what else)
+/fuckduck        - Displays nutsnax filosophy
+/bentley		 - Displays savings plan for M5M400
+/nismo			 - Displays savings plan for Snipa22
 
-?list			 - Displays available help info
-?bench			 - Displays benchmark spreadsheet link
-?pplns			 - Displays links for pplns explanation
-?register		 - Displays registration info
+?help			 - Displays available help info
+?trite			 - Displays fun
+?vega			 - Displays link to latest vega manual
+?statsdiffer	 - Displays info about difference hashrate on dashboard and miner
+?daily			 - Displays daily burgers
 ```
