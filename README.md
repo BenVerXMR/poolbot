@@ -13,6 +13,7 @@ supportXMR chatango PoolBot project
 /fuckduck        	- Displays nutsnax filosophy
 /bentley		 	- Displays savings plan for M5M400
 /nismo			 	- Displays savings plan for Snipa22
+/fee                - Displays transaction fees for a given amount of XMR
 
 ?help			 	- Displays available help info
 ?trite			 	- Displays fun
