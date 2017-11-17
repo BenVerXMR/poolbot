@@ -117,92 +117,94 @@ class bot(ch.RoomManager):
      # print(user.name + " have left the chat")
      # room.message(user.name+" has left the building.)
 
-  def burger():
-      nowTS = time.time()
-      lastBlock = requests.get(apiUrl + "pool/blocks/pplns?limit=80").json()
-      lastBlockFoundTime = lastBlock[0]['ts']
-      timeAgo = prettyTimeDelta(int(int(nowTS) - int(lastBlockFoundTime) / 1000))
-      timeAgoInt = int(int(nowTS) - int(lastBlockFoundTime) / 1000)
-      timeArray = []
-      blockCounter = 1
-      timeArray.append(int(timeAgoInt))
-      while (int(timeAgoInt) <= 86400):
-          lastBlockFoundTime = lastBlock[int(blockCounter)]['ts']
-          timeAgoInt = int(int(nowTS) - int(lastBlockFoundTime) / 1000)
-          blockCounter = blockCounter + 1
-          timeArray.append(timeAgoInt)
-          if blockCounter > 79:
-              room.message("Blockcounter hitting loop-limit: 80. Exiting.")
-              break
-      timeDifferenceArray = []
-      sharesArray = []
-      diffArray = []
-      timeDifferenceArrayLen = int(int(len(timeArray)) - 1)
-      timeDifferenceArrayLoop = 1
-      while (timeDifferenceArrayLoop <= timeDifferenceArrayLen):
-          if lastBlock[int(timeDifferenceArrayLoop)]['valid'] == 1:
-              timeDifference = abs(int(lastBlock[int(timeDifferenceArrayLoop)]['ts'] / 1000) - int(lastBlock[int(timeDifferenceArrayLoop + 1)]['ts'] / 1000))
-              diffVal = int(lastBlock[int(timeDifferenceArrayLoop)]['diff'])
-              sharesVal = int(lastBlock[int(timeDifferenceArrayLoop)]['shares'])
-              diffArray.append(diffVal)
-              sharesArray.append(sharesVal)
-              timeDifferenceArray.append(timeDifference)
-          timeDifferenceArrayLoop = timeDifferenceArrayLoop + 1
-          if timeDifferenceArrayLoop > 79:
-              room.message("timeDifferenceArrayLoop hitting loop-limit: 80. Exiting.")
-              break
-      timeDifferenceArrayResult = int(sum(timeDifferenceArray) / int(timeDifferenceArrayLoop))
-      validBlockLoop = 0
-      while (lastBlock[validBlockLoop]['valid'] == 0):
-          if validBlockLoop >= 80:
-              room.message("lastValidBlockLoop hitting loop-limit: 80. Exiting.")
-              break
-          validBlockLoop = validBlockLoop + 1
-      lastValidBlock = lastBlock[validBlockLoop]['ts']
-      #print(str(prettyTimeDelta(abs(int(lastValidBlock/1000) - int(nowTS)))))
-      #print(str(prettyTimeDelta(int(lastValidBlock/1000))))
-      lastValidBlockDiff = abs(int(nowTS) - int(lastValidBlock/1000))
-      #print(str(prettyTimeDelta(timeDifferenceArrayResult)))
-      #print(str(" . "))
-      #print(str(prettyTimeDelta(lastValidBlockDiff)))
-      if timeDifferenceArrayResult < lastValidBlockDiff:
-          messageEst = str(" Burger is late! ")
-          messageEstSmiley = str("  :( ")
-      else:
-          messageEst = str(" Burger is on time!  ")
-          messageEstSmiley = str(" :) ")
-      nextBlock = abs(timeDifferenceArrayResult - lastValidBlockDiff)
-      effortCalcLoop = 0
-      effortCalcArray = []
-      effortCalcLimit = int(len(diffArray) - 1)
-      while (effortCalcLoop <= effortCalcLimit):
-          diffVal = diffArray[int(effortCalcLoop)]
-          sharesVal = sharesArray[int(effortCalcLoop)]
-          sumVal = int(round(100 * int(sharesVal) / int(diffVal)))
-          effortCalcArray.append(sumVal)
-          effortCalcLoop = effortCalcLoop + 1
-          if effortCalcLoop > 79:
-              room.message("effortCalcLoop hitting loop-limit: 80. Exiting.")
-              break
-      effort24Val = int(sum(effortCalcArray) / int(effortCalcLimit + 1))
-      poolStats = requests.get(apiUrl + "pool/chart/hashrate/").json()
-      poolStatsHashRate = []
-      poolStatsHashRateLoop = 0
-      poolStatsHashRateTime = poolStats[int(poolStatsHashRateLoop)]['ts']
-      poolStatsHashRateVal = poolStats[int(poolStatsHashRateLoop)]['hs']
-      timeAgoPoolstat = int(int(nowTS) - int(poolStatsHashRateTime) / 1000)
-      poolStatsHashRateLoop = poolStatsHashRateLoop + 1
-      while (timeAgoPoolstat <= 86400):
-          poolStatsHashRateTime = poolStats[int(poolStatsHashRateLoop)]['ts']
-          poolStatsHashRateVal = poolStats[int(poolStatsHashRateLoop)]['hs']
-          poolStatsHashRate.append(poolStatsHashRateVal)
-          timeAgoPoolstat = int(int(nowTS) - int(poolStatsHashRateTime) / 1000)
-          poolStatsHashRateLoop = poolStatsHashRateLoop + 1
-          if poolStatsHashRateLoop > 79:
-              print("poolStatsHashRateLoop hitting loop-limit: 80. Exiting.")
-              break
-      poolStatsAvgHashRate = float(int(sum(poolStatsHashRate)/poolStatsHashRateLoop + 1)/1000000)
-      return (blockCounter, timeDifferenceArrayResult, nextBlock, messageEst, messageEstSmiley, effort24Val, poolStatsAvgHashRate)
+  def burger(hournum, timetocheck, blockstocheck, endblocksloop):
+    blockstocheckstr = str(blockstocheck)
+    nowTS = time.time()
+    lastBlock = requests.get(apiUrl + "pool/blocks/pplns?limit=" + blockstocheckstr).json()
+    lastBlockFoundTime = lastBlock[0]['ts']
+    timeAgo = prettyTimeDelta(int(int(nowTS) - int(lastBlockFoundTime) / 1000))
+    timeAgoInt = int(int(nowTS) - int(lastBlockFoundTime) / 1000)
+    timeArray = []
+    blockCounter = 1
+    timeArray.append(int(timeAgoInt))
+    while (int(timeAgoInt) <= timetocheck):
+        lastBlockFoundTime = lastBlock[int(blockCounter)]['ts']
+        timeAgoInt = int(int(nowTS) - int(lastBlockFoundTime) / 1000)
+        blockCounter = blockCounter + 1
+        timeArray.append(timeAgoInt)
+        if blockCounter > endblocksloop:
+            room.message("Blockcounter hitting loop-limit: " + blockstocheckstr + ". Exiting.")
+            break
+    timeDifferenceArray = []
+    sharesArray = []
+    diffArray = []
+    timeDifferenceArrayLen = int(int(len(timeArray)) - 1)
+    timeDifferenceArrayLoop = 1
+    while (timeDifferenceArrayLoop <= timeDifferenceArrayLen):
+        if lastBlock[int(timeDifferenceArrayLoop)]['valid'] == 1:
+            timeDifference = abs(int(lastBlock[int(timeDifferenceArrayLoop)]['ts'] / 1000) - int(lastBlock[int(timeDifferenceArrayLoop + 1)]['ts'] / 1000))
+            diffVal = int(lastBlock[int(timeDifferenceArrayLoop)]['diff'])
+            sharesVal = int(lastBlock[int(timeDifferenceArrayLoop)]['shares'])
+            diffArray.append(diffVal)
+            sharesArray.append(sharesVal)
+            timeDifferenceArray.append(timeDifference)
+        timeDifferenceArrayLoop = timeDifferenceArrayLoop + 1
+        if timeDifferenceArrayLoop > endblocksloop:
+            room.message("timeDifferenceArrayLoop hitting loop-limit: " + str(blockstocheck) + ". Exiting.")
+            break
+    timeDifferenceArrayResult = int(sum(timeDifferenceArray) / int(timeDifferenceArrayLoop))
+    validBlockLoop = 0
+    while (lastBlock[validBlockLoop]['valid'] == 0):
+        if validBlockLoop >= blockstocheck:
+            room.message("lastValidBlockLoop hitting loop-limit: " + str(blockstocheck) + ". Exiting.")
+            break
+        validBlockLoop = validBlockLoop + 1
+    lastValidBlock = lastBlock[validBlockLoop]['ts']
+    #print(str(prettyTimeDelta(abs(int(lastValidBlock/1000) - int(nowTS)))))
+    #print(str(prettyTimeDelta(int(lastValidBlock/1000))))
+    lastValidBlockDiff = abs(int(nowTS) - int(lastValidBlock/1000))
+    #print(str(prettyTimeDelta(timeDifferenceArrayResult)))
+    #print(str(" . "))
+    #print(str(prettyTimeDelta(lastValidBlockDiff)))
+    if timeDifferenceArrayResult < lastValidBlockDiff:
+        messageEst = str(" Burger is late! ")
+        messageEstSmiley = str("  :( ")
+    else:
+        messageEst = str(" Burger is on time!  ")
+        messageEstSmiley = str(" :) ")
+    nextBlock = abs(timeDifferenceArrayResult - lastValidBlockDiff)
+    effortCalcLoop = 0
+    effortCalcArray = []
+    effortCalcLimit = int(len(diffArray) - 1)
+    while (effortCalcLoop <= effortCalcLimit):
+        diffVal = diffArray[int(effortCalcLoop)]
+        sharesVal = sharesArray[int(effortCalcLoop)]
+        sumVal = int(round(100 * int(sharesVal) / int(diffVal)))
+        effortCalcArray.append(sumVal)
+        effortCalcLoop = effortCalcLoop + 1
+        if effortCalcLoop > endblocksloop:
+            room.message("effortCalcLoop hitting loop-limit: " + str(blockstocheck) + ". Exiting.")
+            break
+    effort24Val = int(sum(effortCalcArray) / int(effortCalcLimit + 1))
+    poolStats = requests.get(apiUrl + "pool/chart/hashrate/").json()
+    poolStatsHashRate = []
+    poolStatsHashRateLoop = 0
+    poolStatsHashRateTime = poolStats[int(poolStatsHashRateLoop)]['ts']
+    poolStatsHashRateVal = poolStats[int(poolStatsHashRateLoop)]['hs']
+    timeAgoPoolstat = int(int(nowTS) - int(poolStatsHashRateTime) / 1000)
+    poolStatsHashRateLoop = poolStatsHashRateLoop + 1
+    while (timeAgoPoolstat <= timetocheck):
+        poolStatsHashRateTime = poolStats[int(poolStatsHashRateLoop)]['ts']
+        poolStatsHashRateVal = poolStats[int(poolStatsHashRateLoop)]['hs']
+        poolStatsHashRate.append(poolStatsHashRateVal)
+        timeAgoPoolstat = int(int(nowTS) - int(poolStatsHashRateTime) / 1000)
+        poolStatsHashRateLoop = poolStatsHashRateLoop + 1
+        if poolStatsHashRateLoop > endblocksloop:
+            print("poolStatsHashRateLoop hitting loop-limit: " + str(blockstocheck) + ". Exiting.")
+            break
+    poolStatsAvgHashRate = float(int(sum(poolStatsHashRate)/poolStatsHashRateLoop + 1)/1000000)
+    poolStatsAvgHashRate = format(poolStatsAvgHashRate, ',.2f')
+    return (blockCounter, timeDifferenceArrayResult, nextBlock, messageEst, messageEstSmiley, effort24Val, poolStatsAvgHashRate)
 
   def onMessage(self, room, user, message):
 
@@ -212,9 +214,9 @@ class bot(ch.RoomManager):
       #cmds = ['/help', '/effort', '/pooleffort', '/price', '/block',
       #        '/window', '/test'] # Update if new command
       #hlps = ['?pplns', '?register', '?RTFN', '?rtfn', '?help', '?bench', '?list'] # Update if new helper
-      cmds = ['/help', '/trite', '/scroll', '/goblin', '/mizzery', '/burger', '/motto', '/fuckduck', '/bentley', '/nismo']
+      cmds = ['/help', '/trite', '/scroll', '/goblin', '/mizzery', '/burger', '/motto', '/fuckduck', '/bentley', '/nismo', '/fee']
       hlps = ['?trite', '?help', '?vega', '?daily', '?statsdiffer']
-      searchObj = re.findall(r'(\/\w+)(\.\d+)?|(\?\w+)', message.body, re.I)
+      searchObj = re.findall(r'(\/\w+)(\.\d+)?(\.\d+)?|(\?\w+)', message.body, re.I)
       searchObjCmd = []
       searchObjArg = []
       searchObjHlp = []
@@ -222,9 +224,10 @@ class bot(ch.RoomManager):
         for j in range(len(cmds)):
           if searchObj[i][0] == cmds[j]:
             searchObjCmd.append(searchObj[i][0])
-            searchObjArg.append(searchObj[i][1])
-        if searchObj[i][2]:
-          searchObjHlp.append(searchObj[i][2])
+            searchObjArg.append(searchObj[i][1] + searchObj[i][2])
+            searchObjArg.append(searchObj[i][2])
+        if searchObj[i][3]:
+          searchObjHlp.append(searchObj[i][3])
       command = searchObjCmd
       argument = searchObjArg
       helper = searchObjHlp
@@ -244,10 +247,10 @@ class bot(ch.RoomManager):
 
         if hlp.lower() == "daily":
             room.message("https://goo.gl/c1TQgc")
-			
+      
         if hlp.lower() == "statsdiffer":
             room.message("Your computer does the following while mining:\n\nThe pool gives you a search-job, then your miner starts calculating hashes until it finds one that matches the requirements (difficulty). The miner sends the pool the result if it exceeds the difficulty.\n\nThe pool does not see how often you perform the hash calculations. It only knows when your miner submits a hash that exceeds the difficulty.\n\nThe pool then uses the law of probability to estimate the number of hashes it took to make the share result you found. This is ONLY AN ESTIMATE. That is why you see the fluctuating numbers.\n\nYou do not get paid based on your hashrate, but by a combination of the difficulty of AND the number of shares submitted to the pool.\n\nIn very basic terms:Shares*Difficulty=MuhMoneez\n\n(credits to TheJerichoJones)")
-			
+      
         if hlp.lower() == "vega":
             room.message("https://vegamining.blogspot.com/")
             
@@ -261,11 +264,22 @@ class bot(ch.RoomManager):
       try:
         
         if cmd.lower() == "help":
-            room.message("Available commands (use: /command): trite, help, scroll, goblin, burger, mizzery, motto, fuckduck, bentley, nismo. Help is in helpcommands, try ?help") # Update if new command
+            room.message("Available commands (use: /command): trite, help, scroll, goblin, burger, mizzery, motto, fuckduck, bentley, nismo, fee. \n\nYou can add the number of hours to check burgers by typing burger.x where x is the number of hours. \n\nIf you want to know how much xmr will be deducted from your payment for an amount of XMR use the command fee with the amount of XMR behind it, like \n\nfee.0.3\n\nInformational help is in helpcommands, try ? help") # Update if new command
 
         if cmd.lower() == "burger":
-            (blockCounter, timeDifferenceArrayResult, nextBlock, messageEst, messageEstSmiley, effort24Val, poolStatsAvgHashRate) = bot.burger()
-            room.message("\n\n\n*burger*" + " Total within 24 hours: " + str(blockCounter) + " |. " + "\nAverage effort: " + str(effort24Val) + "%" + " |" + ". \nAverage time between: " + str(prettyTimeDelta(timeDifferenceArrayResult)) + " |.\n" + messageEst + str(prettyTimeDelta(nextBlock)) + messageEstSmiley + " |. " + " \nWith average pool hashrate: " + str(poolStatsAvgHashRate) + "MH/s")
+            if not arg.isdigit():
+              hournum = 24
+            if arg.isdigit():
+              hournum = int(arg)
+            timetocheck = 3600 * hournum
+            blockstocheck = int(round(timetocheck / 3600 / 24 * 100))
+            endblocksloop = blockstocheck - 1
+            if hournum == 0:
+              room.message("How many burgers do you think we found in _zero_hours ? Your fine for testing my whit is... 0.3 XMR to be deducted from your total due within 0 hrs...")
+            if hournum >0:
+              (blockCounter, timeDifferenceArrayResult, nextBlock, messageEst, messageEstSmiley, effort24Val, poolStatsAvgHashRate) = bot.burger(hournum, timetocheck, blockstocheck, endblocksloop)
+              print("blockcount is : " + str(blockCounter) + " for " +  str(hournum) + " hours.")			
+              room.message("\n\n\n*burger*" + " Total within " + str(hournum) + " hours: " + str(blockCounter) + "\nAverage effort: " + str(effort24Val) + "%" + ". \nAverage time between: " + str(prettyTimeDelta(timeDifferenceArrayResult)) + "\n" + messageEst + str(prettyTimeDelta(nextBlock)) + messageEstSmiley + " \nWith average pool hashrate: " + str(poolStatsAvgHashRate) + " MH/s")
 
         if cmd.lower() == "scroll":
             room.message("Scroll up a few lines will ya, Djeez")
@@ -282,7 +296,19 @@ class bot(ch.RoomManager):
         if cmd.lower() == "mizzery":
             room.message("that puzzles me")
             time.sleep(6)
-			
+
+        if cmd.lower() == "fee":
+            amount = float(arg)
+            transfercosts = 0
+            if amount < 0.3:
+              room.message("The amount you want transferred from supportXMR to your wallet is: " + str(amount) + " XMR. \n\nThat will never happen as the minimum payout threshold is 0.3 XMR.")
+            if amount >= 4:
+              room.message("The amount you want transferred from supportXMR to your wallet is: " + str(amount) + " XMR. \n\nFor amounts above 4 XMR the pool waives the fee. The full amount of " + str(amount) + " XMR will arrive in your wallet.")
+            if (amount < 4 and amount >= 0.3):
+              costs = ((amount / ( 0.3 )) * ( 0.008 )) 
+              remainder = amount - costs
+              room.message("The amount you want transferred from supportXMR to your wallet is: " + str(amount) + " XMR. \n\nThe transaction costs for that amount would be " + str(costs) + " XMR. The amount of " + str(remainder) + " XMR will arrive in your wallet.")
+
         if cmd.lower() == "bentley":
             kraken = requests.get("https://api.kraken.com/0/public/Ticker?pair=XMREUR").json()
             EUR_XMR_krak = kraken['result']['XXMRZEUR']['c'][0]
@@ -294,7 +320,7 @@ class bot(ch.RoomManager):
             monerorate = str(EUR_XMR_krak)
             saveuro = float(EUR_XMR_krak)
             savings = savings * saveuro * 6 / 10 / 100 * 6
-            blades = 95 * saveuro
+            blades = 84 * saveuro
             bladesformat = format(blades, ',.2f')
             savingsafterblades = savings - blades
             #krak = ast.literal_eval(EUR_XMR_krak)
@@ -305,8 +331,8 @@ class bot(ch.RoomManager):
             moretosaveafterblades = 200000 - savingsafterblades
             more = format(moretosave, ',.2f')
             moreafterblades = format(moretosaveafterblades, ',.2f')
-            room.message("A Bentley with some options easily costs about 200.000 euro.\n Our pool found " + blocknum + " blocks since its conception. \nCurrent reward is slightly above 6 XMR, \ncurrent value of XMR on Kraken is " + monerorate + " euro. \nAt 0.6 % pool fee, total income of M5M400 would be (slightly, depending on past rewards) more than " + savv + " euro.\nThat means he still had to save " + more + " euro. \n\n He bought some blade servers though, so he's down 95 XMR again, or " + bladesformat + "euro. \n\nThat leaves him with " + savvafter + "euro or now he has to save " + moreafterblades + "euro again.")
-			
+            room.message("A Bentley with some options easily costs about 200.000 euro.\n Our pool found " + blocknum + " blocks since its conception. \nCurrent reward is slightly above 6 XMR, \ncurrent value of XMR on Kraken is " + monerorate + " euro. \nAt 0.6 % pool fee, total income of M5M400 would be (slightly, depending on past rewards) more than " + savv + " euro.\nThat means he still had to save " + more + " euro. \n\n He bought some blade servers though, so he's down 84 XMR again, or " + bladesformat + "euro. \n\nThat leaves him with " + savvafter + "euro or now he has to save " + moreafterblades + "euro again.")
+      
         if cmd.lower() == "nismo":
             kraken = requests.get("https://api.kraken.com/0/public/Ticker?pair=XMRUSD").json()
             EUR_XMR_krak = kraken['result']['XXMRZUSD']['c'][0]
@@ -324,7 +350,7 @@ class bot(ch.RoomManager):
             moretosave = 184950 - savings
             more = format(moretosave, ',.2f')
             room.message("A Nismo starts From 176,585.00 usd.\n Our pool found " + blocknum + " blocks since its conception. \nCurrent reward is slightly above 6 XMR, \ncurrent value of XMR on Kraken is " + monerorate + " usd. \nAt 0.6 % pool fee, total pool income would be (slightly, depending on past rewards) more than " + savv + " usd.\n If M5M400 paid Snipa22 what he would like to get paid, Snipa still had to save " + more + " usd. \n\n As we know nothing about the income flows from M5M400 to Snipa, \n\n(and M5M400 states the same thing)... \n\n We're afraid Snipa will have to come up with 176,585.00 usd to get his car...")
-			
+      
         if cmd.lower() == "trite":
             justsain = ("Attention. Emergency. All personnel must evacuate immediately. \nYou now have 15 minutes to reach minimum safe distance.",
                         "I'm sorry @" + user.name + ", I'm afraid I can't do that.",
