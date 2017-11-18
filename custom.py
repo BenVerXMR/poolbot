@@ -214,7 +214,7 @@ class bot(ch.RoomManager):
       #cmds = ['/help', '/effort', '/pooleffort', '/price', '/block',
       #        '/window', '/test'] # Update if new command
       #hlps = ['?pplns', '?register', '?RTFN', '?rtfn', '?help', '?bench', '?list'] # Update if new helper
-      cmds = ['/help', '/trite', '/scroll', '/goblin', '/mizzery', '/burger', '/motto', '/fuckduck', '/bentley', '/nismo', '/fee']
+      cmds = ['/help', '/trite', '/scroll', '/goblin', '/mizzery', '/burger', '/motto', '/fuckduck', '/bentley', '/nismo', '/fee', '/feefunction']
       hlps = ['?trite', '?help', '?vega', '?daily', '?statsdiffer']
       searchObj = re.findall(r'(\/\w+)(\.\d+)?(\.\d+)?|(\?\w+)', message.body, re.I)
       searchObjCmd = []
@@ -264,7 +264,7 @@ class bot(ch.RoomManager):
       try:
         
         if cmd.lower() == "help":
-            room.message("Available commands (use: /command): trite, help, scroll, goblin, burger, mizzery, motto, fuckduck, bentley, nismo, fee. \n\nYou can add the number of hours to check burgers by typing burger.x where x is the number of hours. \n\nIf you want to know how much xmr will be deducted from your payment for an amount of XMR use the command fee with the amount of XMR behind it, like \n\nfee.0.3\n\nInformational help is in helpcommands, try ? help") # Update if new command
+            room.message("Available commands (use: /command): trite, help, scroll, goblin, burger, mizzery, motto, fuckduck, bentley, nismo, fee, feefunction. \n\nYou can add the number of hours to check burgers by typing burger.x where x is the number of hours. \n\nIf you want to know how much xmr will be deducted from your payment for an amount of XMR use the command fee with the amount of XMR behind it, like \n\nfee.0.3\n\nInformational help is in helpcommands, try ? help") # Update if new command
 
         if cmd.lower() == "burger":
             if not arg.isdigit():
@@ -293,11 +293,22 @@ class bot(ch.RoomManager):
         if cmd.lower() == "fuckduck":
             room.message("\nI'm afraid @" + user.name + " wants you to go fuck a duck...")
 
+        if cmd.lower() == "feefunction":
+            room.message("\ntransaction fee can be calculated by the bot for you (fee command) or you can do it yourself: \n\nfee = (-0.008*payout/3.7)+(0.008*4/3.7)")
+
         if cmd.lower() == "mizzery":
             room.message("that puzzles me")
             time.sleep(6)
 
         if cmd.lower() == "fee":
+            try:
+              float(arg)
+            except ValueError:
+              if arg == "":
+                room.message("Pleas add an amount of xmr like fee.0.9 behind the slash.")
+                break
+              room.message("Comedians are funny. You are not.")
+              break
             amount = float(arg)
             transfercosts = 0
             if amount < 0.3:
@@ -305,9 +316,13 @@ class bot(ch.RoomManager):
             if amount >= 4:
               room.message("The amount you want transferred from supportXMR to your wallet is: " + str(amount) + " XMR. \n\nFor amounts above 4 XMR the pool waives the fee. The full amount of " + str(amount) + " XMR will arrive in your wallet.")
             if (amount < 4 and amount >= 0.3):
-              costs = ((amount / ( 0.3 )) * ( 0.008 )) 
+              #costs = ((3.7-(amount-.3))/3.7*16/600)*amount
+              costs = (-0.008*amount/3.7)+(0.008*4/3.7)
+              costsf = format(costs, ',.4f')
               remainder = amount - costs
-              room.message("The amount you want transferred from supportXMR to your wallet is: " + str(amount) + " XMR. \n\nThe transaction costs for that amount would be " + str(costs) + " XMR. The amount of " + str(remainder) + " XMR will arrive in your wallet.")
+              remainderf = format(remainder, ',.4f')
+              room.message("The amount you want transferred from supportXMR to your wallet is: " + str(amount) + " XMR. \n\nThe transaction costs for that amount would be " + str(costsf) + " XMR. The amount of " + str(remainderf) + " XMR will arrive in your wallet.")
+            
 
         if cmd.lower() == "bentley":
             kraken = requests.get("https://api.kraken.com/0/public/Ticker?pair=XMREUR").json()
